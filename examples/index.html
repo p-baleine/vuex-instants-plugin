@@ -1,0 +1,182 @@
+<!doctype html>
+<html>
+  <head>
+    <title>An example of vue-instants-plugin</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuex@3.1.3"></script>
+    <script src="../dist/bundle.js"></script>
+
+    <style>
+      html {
+        background-image: url(https://data.whicdn.com/images/265637284/original.jpg);
+        background-size: cover;
+        position: relative;
+        height: 100%;
+        width: 100%;
+      }
+
+      #doremi {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        color: #fff;
+        text-shadow: 1px 1px 2px #000;
+        font-weight: bold;
+        font-size: 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="demo"></div>
+    <script>
+Vue.use(Vuex)
+Vue.use(VuexInstantsPlugin)
+
+const store = new Vuex.Store({
+  modules: {
+    characters: {
+      namespaced: true,
+      state: {
+        allIds: ['春風どれみ', 'おんぷっち'],
+        byIds: {
+          '春風どれみ': {
+            id: '春風どれみ',
+            quotes: [1, 2,]
+          },
+          'おんぷっち': {
+            id: 'おんぷっち',
+            quotes: [3,]
+          }
+        },
+        hasAndBelongsToMany: {
+          repertories: {
+            associationForeignKey: 'songId',
+            foreignKey: 'characterId',
+            joinName: 'characterSongs',
+            theirName: 'songs'
+          }
+        },
+      }
+    },
+    quotes: {
+      namespaced: true,
+      state: {
+        allIds: [1, 2, 3,],
+        byIds: {
+          1: {
+            id: 1,
+            title: 'ピリカピリララ ポポリナペーペルト,ピリカピリララ のびやかに',
+            characterId: '春風どれみ',
+          },
+          2: {
+            id: 2,
+            title: 'プリティー・ウィッチー・どれみっち',
+            characterId: '春風どれみ',
+          },
+          3: {
+            id: 3,
+            title: 'プリティー・ウィッチー・おんぷっち',
+            characterId: 'おんぷっち',
+          },
+        }
+      }
+    },
+    songs: {
+      namespaced: true,
+      state: {
+        allIds: [1, 2, 3,],
+        byIds: {
+          1: {
+            id: 1,
+            title: 'half point',
+          },
+          2: {
+            id: 2,
+            title: 'ルピナスの子守歌',
+          },
+          3: {
+            id: 3,
+            title: 'WE CAN DO!',
+          },
+        }
+      }
+    },
+    characterSongs: {
+      namespaced: true,
+      state: {
+        allIds: [1, 2,],
+        byIds: {
+          1: {
+            id: 1,
+            characterId: 'おんぷっち',
+            songId: 1
+          },
+          2: {
+            id: 2,
+            characterId: 'おんぷっち',
+            songId: 2
+          },
+        },
+      },
+    },
+  },
+  state: {},
+})
+
+Vue.component('example', {
+  template: `
+<div id="doremi">
+  <ul>
+    <li v-for="name in characterNames" :key="name">
+      {{ name }}
+    </li>
+  </ul>
+  <div>
+    <h3>お着替え♪♪</h3>
+    「{{ お着替え | 雰囲気で }} ♪♪♪」
+  </div>
+  <div>
+    <h3>十八番♪♪</h3>
+    <ul>
+      <li v-for="repertory in 十八番" :key="repertory.id">
+        {{ repertory.title }}
+      </li>
+    </ul>
+  </div>
+</div>
+`,
+  computed: {
+    お着替え() {
+      return this.$store
+        .capture('characters/where', { id: 'おんぷっち' })
+        .quotes
+        .pluck(['title'])[0]
+    },
+
+    十八番() {
+      return this.$store
+        .capture('characters/where', { id: 'おんぷっち' })
+        .repertories
+    },
+
+    characterNames() {
+      return this.$store.state.characters.allIds
+    },
+  },
+  filters: {
+    雰囲気で(www) {
+      return www.title
+    }
+  }
+})
+
+new Vue({
+  el: '#demo',
+  store,
+  template: '<example/>'
+})
+
+    </script>
+  </body>
+</html>

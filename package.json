@@ -1,0 +1,38 @@
+{
+  "name": "vuex-instants-plugin",
+  "version": "1.0.0",
+  "description": "* Description A plugin which leverages [[https://redux.js.org/recipes/structuring-reducers/normalizing-state-shape][Normalizing State Shape]] by wrapping Vuex getters.",
+  "main": "webpack.config.js",
+  "directories": {
+    "example": "examples"
+  },
+  "dependencies": {
+    "vue": "^2.6.11",
+    "vuex": "^3.1.3"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.9.0",
+    "@babel/preset-typescript": "^7.9.0",
+    "@types/jest": "^25.1.4",
+    "@types/vue": "^2.0.0",
+    "jest": "^25.2.3",
+    "ts-loader": "^6.2.2",
+    "typescript": "^3.8.3",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
+  },
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gist.github.com/a758c420ee7fe44cc25df566abf28654.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gist.github.com/a758c420ee7fe44cc25df566abf28654"
+  },
+  "homepage": "https://gist.github.com/a758c420ee7fe44cc25df566abf28654"
+}
