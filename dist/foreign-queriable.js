@@ -9,8 +9,18 @@ export default {
         }
         if (target.data) {
             if (name === 'length') {
-                // 存在チェック(長さ0の場合)をしたいので一番最優先とする
+                // 存在チェック向けに length は最優先で返す
                 return target.data.length;
+            }
+            if (typeof target.data[name] === 'function') {
+                // 配列のメソッドでアクセスされたときは target.data に移譲する
+                // target.data が空の場合も target.data の空配列に処理を
+                // 移譲したいので、下の空 Relation の判定の前に返す
+                return target.data[name].bind(target.data);
+            }
+            if (!target.data.length) {
+                // メソッドチェインがこけないように空の Relation を返す
+                return new Relation([], target.root, name, null);
             }
             if (name in target.data[0]) {
                 // 子供の問い合わせ
@@ -25,10 +35,6 @@ export default {
             if (isIndexName(name)) {
                 // インデックス like な名前のときは配列へのアクセスを真似る
                 return target.data[name];
-            }
-            if (typeof target.data[name] === 'function') {
-                // 配列のメソッドでアクセスされたときは target.data に移譲する
-                return target.data[name].bind(target.data);
             }
         }
         throw new TypeError("\u77E5\u3089\u3093\u304C\u306A: " + name + ".");

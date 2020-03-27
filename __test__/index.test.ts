@@ -40,7 +40,6 @@ describe('vue-instants-plugin', () => {
           store.capture('authors/where', { id: '夏目漱石' })[0].id
         ).toBe('夏目漱石');
       });
-
     });
 
     describe('#findBy', () => {
@@ -48,7 +47,7 @@ describe('vue-instants-plugin', () => {
         expect(
           store.capture('authors/findBy', { id: '夏目漱石' }).id
         ).toBe('夏目漱石')
-      })
+      });
     })
 
     describe('Relations', () => {
@@ -109,19 +108,46 @@ describe('vue-instants-plugin', () => {
       })
 
       describe('When empty Relation', () => {
+        it('Returns empty Relation.', () => {
+          // capture の結果が空のとき、length は 0 を返す
+          expect(store.capture('authors/where', { id: 'にゃ' }).length)
+            .toBe(0);
+        });
+
         it('Returns empty result on pluck.', () => {
+          // capture の結果が空のとき、空の Relation を返すので
+          // Relation のメソッドはよべる
           expect(
             store.capture('authors/where', { id: 'だれか' })
             .pluck(['title'])
           ).toEqual([]);
         });
 
-        // FIXME: 検索結果が空のとき配列に処理を移譲するとわかりにくいエラーになる
-        xit('Returns empty result on pluck.', () => {
+        it('Returns empty result on pluck.', () => {
+          // capture の結果が空のとき、空の Relation を返すので
+          // Relation のメソッドはよべる
           expect(
             store.capture('authors/where', { id: 'だれか' })
             .map(x => x.id)
           ).toEqual([]);
+        });
+
+        describe('When children are empty.', () => {
+          it('Returns empty array.', () => {
+            // 子供への問い合せの結果が空のとき、length は 0 を返す
+            expect(store.capture('authors/where', { id: 'にゃ' }).works.length)
+              .toBe(0);
+          });
+
+          it('Returns empty array.', () => {
+            // 子供への問い合せの結果が空のとき、空の Relation を返すので
+            // Relation のメソッドはよべる
+            expect(
+              store.capture('authors/where', { id: 'にゃ' })
+                .works
+                .pluck(['title'])
+            ).toEqual([]);
+          });
         });
       })
 

@@ -81,10 +81,7 @@ function install() {
             var _this = this;
             assert(function () { return (!_this.instants || type in _this.instants); }, "\n" + type + " is not defined in store.instans.\n\nDon't you forget adding " + type + " in store.instans?\n");
             var desc = Object.getOwnPropertyDescriptor(this.getters, type);
-            if (!desc) {
-                return;
-            }
-            assert(function () { return !!desc.get; }, "Unknown getter, " + type);
+            assert(function () { return !!desc && !!desc.get; }, "Unknown getter, " + type);
             var result = desc.get.call(this)(payload);
             var name = myName(type);
             // TODO: ForeignQueriable でも使うのでなんか関数きろう
@@ -119,6 +116,12 @@ var where = function (allIds, byIds, cond) {
 // Defaultly injected Instants(query methods).
 // Methods would be compliant to `rails/activerecord`.
 var defaultInstants = {
+    all: function (_a) {
+        var byIds = _a.byIds;
+        return function () {
+            return Object.values(byIds);
+        };
+    },
     where: function (_a) {
         var allIds = _a.allIds, byIds = _a.byIds;
         return function (cond) {
