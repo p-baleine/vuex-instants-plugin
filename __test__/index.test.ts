@@ -1,5 +1,3 @@
-console.log('aaa', window.Vuex)
-
 import Vue from 'vue'
 import Vuex from 'vuex'
 
@@ -17,6 +15,25 @@ describe('vue-instants-plugin', () => {
   })
 
   describe('capture', () => {
+    describe('#all', () => {
+      it('Returns all entries.', () => {
+        expect(
+          store.capture('authors/all')
+          .map(x => x.id)
+        ).toEqual(
+          expect.arrayContaining(['夏目漱石', '芥川龍之介', '森鴎外'])
+        );
+      });
+    });
+
+    describe('#find', () => {
+      it('Returns the entry speicified by id.', () => {
+        expect(
+          store.capture('authors/find', '森鴎外').id
+        ).toEqual('森鴎外');
+      });
+    });
+
     describe('#where', () => {
       it('Returns relation quried by specified cond.', () => {
         expect(

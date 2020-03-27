@@ -109,11 +109,7 @@ Don't you forget adding ${type} in store.instans?
       const desc = Object.getOwnPropertyDescriptor(
         this.getters, type);
 
-      if (!desc) {
-        return;
-      }
-
-      assert(() => !!desc.get, `Unknown getter, ${type}`);
+      assert(() => !!desc && !!desc.get, `Unknown getter, ${type}`);
 
       const result =  desc.get.call(this)(payload);
       const name = myName(type);
@@ -153,6 +149,10 @@ const where: Where = function(allIds, byIds, cond) {
 // Defaultly injected Instants(query methods).
 // Methods would be compliant to `rails/activerecord`.
 const defaultInstants = {
+  all: ({ byIds }) => () => {
+    return Object.values(byIds);
+  },
+
   where: ({ allIds, byIds }) => (cond: WhereCond) => {
     return where(allIds, byIds, cond)
   },
