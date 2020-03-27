@@ -86,9 +86,10 @@ function defineDefaultInstants<S>(
 //
 // Please see example.js to know how to use this plugin.
 function install<S, R>() {
+  const vuex = window.Vuex || Vuex;
+
   // Patch `Vuex.Store` to inject Instants.
-  window.Vuex.Store = class InstantsInjector<S>
-    extends window.Vuex.Store<S> {
+  vuex.Store = class InstantsInjector<S> extends vuex.Store<S> {
     constructor(options: StoreOptions<S>) {
       defineDefaultInstants(options)
       injectInstants(options)
@@ -97,7 +98,7 @@ function install<S, R>() {
   };
 
   // `capture`
-  (<InstantsPlugin<S, R> > window.Vuex.Store.prototype).capture =
+  (<InstantsPlugin<S, R> > vuex.Store.prototype).capture =
     function(type, payload) {
       assert(() => (!this.instants || type in this.instants), `
 ${type} is not defined in store.instans.

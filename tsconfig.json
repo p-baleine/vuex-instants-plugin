@@ -14,5 +14,12 @@
       "esnext.array",
       "dom"
     ]
-  }
+  },
+  "files": [
+    "src/foreign-queriable.ts",
+    "src/index.ts",
+    "src/relation.ts",
+    "src/utils.ts",
+    "types/window.d.ts"
+  ]
 }

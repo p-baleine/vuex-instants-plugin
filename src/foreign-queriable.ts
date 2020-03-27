@@ -10,6 +10,11 @@ export default {
     }
 
     if (target.data) {
+      if (name === 'length') {
+        // 存在チェック(長さ0の場合)をしたいので一番最優先とする
+        return target.data.length;
+      }
+
       if (name in target.data[0]) {
         // 子供の問い合わせ
         return childRelation(target, name)
@@ -26,10 +31,6 @@ export default {
       if (isIndexName(name)) {
         // インデックス like な名前のときは配列へのアクセスを真似る
         return target.data[name]
-      }
-
-      if (name === 'length') {
-        return target.data.length;
       }
 
       if (typeof target.data[name] === 'function') {
