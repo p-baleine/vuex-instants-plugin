@@ -6,11 +6,11 @@ A plugin which leverages [[https://redux.js.org/recipes/structuring-reducers/nor
 -----
 
 If you are constructing your application with Vue/Vuex and keeping your state
-in normalized form(*1), i.e. keeping your state as if they're normalized like
-entities in RDB, this plugin will provide tiny stylish APIs♪♪ by thinly
-wrapping Vuex getters.
+in normalized form [1], i.e. keeping your state as if they're normalized like
+entities in RDB, this plugin will provide tiny rails/activerecord like
+(stylish) APIs♪♪ by thinly wrapping Vuex getters.
 
-+ *1 :: Normalizing State Shape, https://redux.js.org/recipes/structuring-reducers/normalizing-state-shape
++ 1 :: Normalizing State Shape, https://redux.js.org/recipes/structuring-reducers/normalizing-state-shape
 
-* TODOs
-いろいろ諸々
+* Usage
+TBD
