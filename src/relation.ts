@@ -1,6 +1,6 @@
 import { Module } from 'vuex';
 
-import ForeignQueriable from './foreign-queriable';
+import ForeignQueriable, { cascadingQueries } from './foreign-queriable';
 import { assert } from './utils';
 
 export type Id = number | string;
@@ -26,41 +26,58 @@ export interface HasAndBelongsToManyOption {
   };
 }
 
+export interface Query {
+  (parentData: Array<NormalizedRelationEntry>):
+  Array<NormalizedRelationEntry>;
+}
+
+export interface CascadingQueries<S, R> {
+  (relation: Relation<S, R>): Array<NormalizedRelationEntry>;
+}
+
+export interface WhereMethod<S, R> {
+  where(key: string, cond: { $match: RegExp }): Relation<S, R>;
+  where(key: string, cond: any): Relation<S, R>;
+}
+
 // 関連
 export interface Relation<S, R>
   extends Iterable<NormalizedRelationEntry> {
   name: string;
   root: Module<S, R>;
-  data: Array<NormalizedRelationEntry>;
+  queries: Array<Query>;
+  whereQueries: Array<Query>;
   hasAndBelongsToMany: HasAndBelongsToManyOption;
 }
 
 // 関連
-export class RelationBase<S, R> implements Relation<S, R> {
+export class RelationBase<S, R>
+  implements Relation<S, R>, WhereMethod<S, R> {
   name: string;
   root: Module<S, R>;
-  data: Array<NormalizedRelationEntry>;
+  queries: Array<Query>;
+  whereQueries: Array<Query> = [];
   hasAndBelongsToMany: HasAndBelongsToManyOption;
   nextIdx: number = 0;
 
   constructor(
-    data: Array<NormalizedRelationEntry>,
+    queries: Array<Query>,
     rootModule: Module<S, R>,
     name: string,
     hasAndBelongsToMany: HasAndBelongsToManyOption) {
 
-    assert(() => Array.isArray(data),
-           `${data} must be type Array.`)
+    assert(() => Array.isArray(queries),
+           `${queries} must be type Array.`)
 
     this.name = name;
     this.root = rootModule;
-    this.data = data;
+    this.queries = queries;
     this.hasAndBelongsToMany = hasAndBelongsToMany;
   }
 
   // イテレータインターフェース
   [Symbol.iterator]() {
-    const { data } = this;
+    const data = cascadingQueries(this);
     let { nextIdx } = this;
 
     return {
@@ -78,11 +95,27 @@ export class RelationBase<S, R> implements Relation<S, R> {
     }
   }
 
-  // TODO: もっとメソッド充実しましょう
-  // https://github.com/rails/rails/blob/master/activerecord/lib/active_record/relation/calculations.rb
+  // Where
+  // TODO: おいだす(https://typescript-jp.gitbook.io/deep-dive/type-system/mixins)
+  where(key: string, cond: { $match: RegExp }): Relation<S, R>;
+  where(key: string, cond: any){
+    const match = (pattern, d) => d[key].match(pattern);
+    const equal = (value, d) => d[key] === value;
+
+    let filterFn;
+
+    if (cond && '$match' in cond) {
+      filterFn = match.bind(null, cond.$match);
+    } else {
+      filterFn = equal.bind(null, cond);
+    }
+
+    this.whereQueries.push((parentData) => parentData.filter(filterFn));
+    return this;
+  }
 
   pluck(keys: Array<string>) {
-    return this.data.flatMap(r => {
+    return cascadingQueries(this).flatMap(r => {
       return keys.reduce((acc, key) => ({
         ...acc,
         [key]: r[key],
@@ -91,7 +124,7 @@ export class RelationBase<S, R> implements Relation<S, R> {
   }
 
   ids() {
-    return this.data.map(r => r.id)
+    return cascadingQueries(this).map(r => r.id)
   }
 }
 
@@ -99,12 +132,12 @@ export class RelationBase<S, R> implements Relation<S, R> {
 // RelationBase + ForeignQueriable
 export class Relation<S, R> {
   constructor(
-    data: Array<NormalizedRelationEntry>,
+    queries: Array<Query>,
     rootModule: Module<S, R>,
     name: string,
     hasAndBelongsToMany: HasAndBelongsToManyOption) {
     const x = new RelationBase<S, R>(
-      data, rootModule, name, hasAndBelongsToMany);
+      queries, rootModule, name, hasAndBelongsToMany);
     return (new Proxy(x, ForeignQueriable) as Relation<S, R>);
   }
 }

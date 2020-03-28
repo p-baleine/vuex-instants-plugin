@@ -6,6 +6,7 @@ import {
   ByIds,
   HasAndBelongsToManyOption,
   Id,
+  Query,
   Relation,
 } from './relation'
 
@@ -111,13 +112,15 @@ Don't you forget adding ${type} in store.instans?
 
       assert(() => !!desc && !!desc.get, `Unknown getter, ${type}`);
 
-      const result =  desc.get.call(this)(payload);
+      const result = desc.get.call(this)(payload);
       const name = myName(type);
-      // TODO: ForeignQueriable でも使うのでなんか関数きろう
-      const hasAndBelongsToManyOption = this.state[name].hasAndBelongsToMany
+      const hasAndBelongsToManyOption = this.state[name]
+        .hasAndBelongsToMany;
 
       return Array.isArray(result)
-        ? new Relation(result, this, name, hasAndBelongsToManyOption)
+        ? new Relation(
+          [() => result], this, name,
+          hasAndBelongsToManyOption)
         : result;
     };
 }

@@ -6,12 +6,13 @@ window.Vuex = Vuex;
 import VuexInstantsPlugin from '../src/index.ts'
 
 describe('vue-instants-plugin', () => {
-  let store;
+  let store, Schema;
 
   beforeAll(() => {
     Vue.use(Vuex)
     Vue.use(VuexInstantsPlugin)
     store = new Vuex.Store(data)
+    Schema = store.Schema
   })
 
   describe('capture', () => {
@@ -105,7 +106,7 @@ describe('vue-instants-plugin', () => {
           .toEqual(
             expect.arrayContaining(['我輩は猫である', 'こころ'])
           );
-      })
+      });
 
       describe('When empty Relation', () => {
         it('Returns empty Relation.', () => {
@@ -149,7 +150,43 @@ describe('vue-instants-plugin', () => {
             ).toEqual([]);
           });
         });
-      })
+      });
+
+      describe('#where', () => {
+        it('指定された条件に合致するエントリのみ返却すること', () => {
+          expect(
+            store
+            .capture('authors/where', { id: '夏目漱石' })
+            .works
+            .where('title', { $match: /猫/ })
+            .map(x => x.title)
+          ).toEqual(['我輩は猫である']);
+
+          expect(
+            store
+            .capture('authors/all')
+            .where({ authorId: '芥川龍之介' })
+            .works
+            .map(x => x.title)
+          ).toEqual(
+            expect.arrayContaining(['蜘蛛の糸', '藪の中'])
+          );
+        });
+
+        describe('Child', () => {
+          xit('指定された条件に合致するエントリのみ返却すること', () => {
+            expect(
+              store
+              .capture('authors/all')
+              .where({ [Schema.WORKS.idName]: '芥川龍之介' })
+              .woeks
+              .map(x => x.title)
+            ).toEqual(
+              expect.arrayContaining(['蜘蛛の糸', '藪の中'])
+            );
+          });
+        });
+      });
 
       describe('Children', () => {
         it('Returns the object quried by specified cond.', () => {
